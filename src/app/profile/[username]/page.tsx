@@ -12,7 +12,8 @@ type Props = {
   };
 };
 
-const ProfilePage = async ({ params: { username } }: Props) => {
+const ProfilePage = async ({ params }: Props) => {
+  const { username } = params;
   const user = await prisma.user.findFirst({
     where: {
       username: username,
