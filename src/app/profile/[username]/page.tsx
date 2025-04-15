@@ -7,13 +7,16 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 
 type Props = {
-  params: {
+  params: Promise<{
     username: string;
-  };
+  }>;
 };
 
 const ProfilePage = async ({ params }: Props) => {
-  const { username } = params;
+  const resolvedParams = await params;
+  const { username } = resolvedParams;
+
+  console.log("Username:", username);
   const user = await prisma.user.findFirst({
     where: {
       username: username,
