@@ -1,4 +1,6 @@
 // app/api/comments/route.ts
+export const dynamic = "force-dynamic"; // 👈 prevent build-time execution
+
 import { NextResponse } from "next/server";
 import prisma from "@/lib/client";
 
