@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/client"; // or wherever your prisma client is
 
+//to test the db connection
 export async function GET() {
   try {
     await prisma.$connect();
