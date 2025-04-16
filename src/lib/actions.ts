@@ -297,7 +297,7 @@ export const addPost = async (formData: FormData, img: string) => {
   }
 };
 
-//mag: add story
+//mag: add story I will modify later
 export const addStory = async (img: string) => {
   const { userId } = await auth();
 
