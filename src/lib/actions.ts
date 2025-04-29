@@ -277,7 +277,7 @@ export const addComment = async (postId: number, desc: string) => {
 export const addPost = async (formData: FormData, img: string) => {
   const desc = formData.get("desc") as string;
 
-  const Desc = z.string().min(1).max(255);
+  const Desc = z.string().min(1).max(10000);
 
   const validatedDesc = Desc.safeParse(desc);
 
