@@ -4,6 +4,9 @@ import { auth } from "@clerk/nextjs/server";
 import prisma from "./client";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { formatDateTime } from "./utils";
+import { unlink, writeFile } from "fs/promises";
+import path from "path";
 
 //mag: followers and following
 export const switchFollow = async (userId: string) => {
@@ -157,12 +160,12 @@ export const declineFollowRequest = async (userId: string) => {
   }
 };
 
-//mag: updating user profile
+//mag: update user
 export const updateProfile = async (
   prevState: { success: boolean; error: boolean },
-  payload: { formData: FormData; cover: string }
+  payload: { formData: FormData; cover: string; phone?: string }
 ) => {
-  const { formData, cover } = payload;
+  const { formData, cover, phone } = payload;
   const fields = Object.fromEntries(formData);
 
   const filteredFields = Object.fromEntries(
@@ -178,9 +181,16 @@ export const updateProfile = async (
     school: z.string().max(60).optional(),
     work: z.string().max(60).optional(),
     website: z.string().max(60).optional(),
+    phone: z.string().max(20).optional(),
+    course: z.string().max(60).optional(),
+    regNo: z.string().max(60).optional(),
   });
 
-  const validatedFields = Profile.safeParse({ cover, ...filteredFields });
+  const validatedFields = Profile.safeParse({
+    cover,
+    phone,
+    ...filteredFields,
+  });
 
   if (!validatedFields.success) {
     console.log(validatedFields.error.flatten().fieldErrors);
@@ -195,9 +205,7 @@ export const updateProfile = async (
 
   try {
     await prisma.user.update({
-      where: {
-        id: userId,
-      },
+      where: { id: userId },
       data: validatedFields.data,
     });
     return { success: true, error: false };
@@ -351,4 +359,93 @@ export const deletePost = async (postId: number) => {
   } catch (err) {
     console.log(err);
   }
+};
+
+//mag: Event creation
+
+export const createEvent = async (formData: FormData) => {
+  const { userId } = await auth();
+
+  if (!userId) {
+    throw new Error("User is not authenticated!");
+  }
+
+  console.log("data", formData);
+
+  const name = formData.get("name") as string;
+  const schedule = formData.get("schedule") as string;
+  const details = formData.get("details") as string;
+  const image = formData.get("image") as File;
+
+  let imageUrl: string | null = null;
+
+  if (image && image.size > 0) {
+    const bytes = await image.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    const imageName = `${Date.now()}-${image.name.replace(/\s/g, "")}`;
+    const imagePath = path.join(process.cwd(), "public/uploads", imageName);
+
+    await writeFile(imagePath, buffer);
+    imageUrl = `/uploads/${imageName}`;
+  }
+
+  try {
+    await prisma.event.create({
+      data: {
+        name: name.trim(),
+        schedule: new Date(schedule),
+        details: details.trim(),
+        imageUrl: imageUrl,
+        userId,
+      },
+    });
+
+    revalidatePath("/");
+  } catch (err) {
+    console.error("Error creating event:", err);
+    throw new Error("Failed to create event.");
+  }
+};
+
+// Fetch events
+export const getEvents = async () => {
+  const events = await prisma.event.findMany({
+    orderBy: { schedule: "asc" },
+  });
+
+  return events;
+};
+
+// Delete event
+export const deleteEvent = async (eventId: number) => {
+  const { userId } = await auth();
+
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  const event = await prisma.event.findUnique({
+    where: { id: eventId },
+  });
+
+  if (!event) {
+    throw new Error("Event not found");
+  }
+
+  if (event.userId !== userId) {
+    throw new Error("You don't have permission to delete this event.");
+  }
+
+  // Delete the image if exists
+  if (event.imageUrl) {
+    const imagePath = path.join(process.cwd(), "public", event.imageUrl);
+    await unlink(imagePath).catch(() => {}); // Ignore if file doesn't exist
+  }
+
+  await prisma.event.delete({
+    where: { id: eventId },
+  });
+
+  revalidatePath("/events");
 };

@@ -7,10 +7,28 @@ import { useActionState, useState } from "react";
 import { CldUploadWidget } from "next-cloudinary";
 import { useRouter } from "next/navigation";
 import UpdateButton from "./UpdateButton";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import PhoneInput from "react-phone-number-input/input";
+import "react-phone-number-input/style.css";
+import { showToast } from "../react_toastfy/showToast";
 
 const UpdateUser = ({ user }: { user: User }) => {
   const [open, setOpen] = useState(false);
   const [cover, setCover] = useState<any>(false);
+  const [phone, setPhone] = useState<string | undefined>(
+    user.phone?.replace(/\s+/g, "") || ""
+  );
+  const [isStudent, setIsStudent] = useState<boolean>(!!user.course);
 
   const [state, formAction] = useActionState(updateProfile, {
     success: false,
@@ -25,161 +43,195 @@ const UpdateUser = ({ user }: { user: User }) => {
   };
 
   return (
-    <div className="">
-      <span
-        className="text-blue-500 text-xs cursor-pointer"
-        onClick={() => setOpen(true)}
-      >
-        Update
-      </span>
-      {open && (
-        <div className="absolute w-screen h-screen top-0 left-0 bg-black bg-opacity-65 flex items-center justify-center z-50 ">
-          <form
-            action={(formData) =>
-              formAction({ formData, cover: cover?.secure_url || "" })
-            }
-            className="p-12 bg-white rounded-lg shadow-md flex flex-col gap-2 w-full md:w-1/2 xl:w-1/3 relative"
-          >
-            {/* TITLE */}
-            <h1>Update Profile</h1>
-            <div className="mt-4 text-xs text-gray-500">
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <span className="text-blue-500 text-xs cursor-pointer">Update</span>
+      </DialogTrigger>
+
+      <DialogContent className="w-full h-full max-w-4xl sm:max-h-[90vh] overflow-y-auto">
+        <form
+          action={(formData) =>
+            formAction({
+              formData,
+              cover: cover?.secure_url || "",
+              phone,
+            })
+          }
+          className="flex flex-col gap-4 p-4 sm:p-6"
+        >
+          <DialogHeader>
+            <DialogTitle className="text-xl">Update Profile</DialogTitle>
+            <p className="text-xs text-gray-500">
               Use the navbar profile to change the avatar or username.
+            </p>
+          </DialogHeader>
+
+          {/* COVER UPLOAD */}
+          <CldUploadWidget
+            uploadPreset="mmu-users-images"
+            onSuccess={(result) => setCover(result.info)}
+          >
+            {({ open }) => (
+              <div onClick={() => open()} className="cursor-pointer">
+                <Label>Cover Picture</Label>
+                <div className="flex items-center gap-3 mt-2">
+                  <Image
+                    src={user.cover || "/noCover.png"}
+                    alt=""
+                    width={48}
+                    height={32}
+                    className="w-12 h-8 rounded-md object-cover"
+                  />
+                  <span className="text-xs underline text-gray-600">
+                    Change
+                  </span>
+                </div>
+              </div>
+            )}
+          </CldUploadWidget>
+
+          {/* PHONE */}
+          <div>
+            <Label htmlFor="phone">Phone Number</Label>
+            <PhoneInput
+              id="phone"
+              name="phone"
+              value={phone?.replace(/\s+/g, "")}
+              onChange={setPhone}
+              placeholder="Enter phone number"
+              className="mt-2 ring-1 ring-gray-300 p-[13px] rounded-md text-sm"
+            />
+          </div>
+
+          {/* GENERAL PROFILE FIELDS */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[
+              {
+                name: "name",
+                label: "First Name",
+                placeholder: user.name || "John",
+              },
+              {
+                name: "surname",
+                label: "Surname",
+                placeholder: user.surname || "Doe",
+              },
+              {
+                name: "description",
+                label: "Description",
+                placeholder: user.description || "Life is beautiful...",
+              },
+              {
+                name: "city",
+                label: "City",
+                placeholder: user.city || "Nairobi",
+              },
+              {
+                name: "school",
+                label: "School",
+                placeholder: user.school || "MMU",
+              },
+              {
+                name: "website",
+                label: "Website",
+                placeholder: user.website || "https://example.com",
+              },
+            ].map((field) => (
+              <div key={field.name}>
+                <Label htmlFor={field.name}>{field.label}</Label>
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  placeholder={field.placeholder}
+                  defaultValue={user[field.name as keyof User] as string}
+                  className="mt-1"
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* OCCUPATION FIELDS */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="occupation">Are you a student?</Label>
+              <div className="flex gap-2 mt-2">
+                <button
+                  type="button"
+                  className={`${
+                    isStudent ? "bg-blue-500 text-white" : "bg-gray-200"
+                  } p-2 rounded-md`}
+                  onClick={() => setIsStudent(true)}
+                >
+                  Yes
+                </button>
+                <button
+                  type="button"
+                  className={`${
+                    !isStudent ? "bg-blue-500 text-white" : "bg-gray-200"
+                  } p-2 rounded-md`}
+                  onClick={() => setIsStudent(false)}
+                >
+                  No
+                </button>
+              </div>
             </div>
-            {/* COVER PIC UPLOAD */}
-            <CldUploadWidget
-              uploadPreset="mmu-users-images"
-              onSuccess={(result) => setCover(result.info)}
-            >
-              {({ open }) => {
-                return (
-                  <div
-                    className="flex flex-col gap-4 my-4"
-                    onClick={() => open()}
-                  >
-                    <label htmlFor="">Cover Picture</label>
-                    <div className="flex items-center gap-2 cursor-pointer">
-                      <Image
-                        src={user.cover || "/noCover.png"}
-                        alt=""
-                        width={48}
-                        height={32}
-                        className="w-12 h-8 rounded-md object-cover"
-                      />
-                      <span className="text-xs underline text-gray-600">
-                        Change
-                      </span>
-                    </div>
-                  </div>
-                );
-              }}
-            </CldUploadWidget>
 
-            {/* WRAPPER */}
-            <div className="flex flex-wrap justify-between gap-2 xl:gap-4">
-              {/* INPUT */}
-              <div className="flex flex-col gap-4">
-                <label htmlFor="" className="text-xs text-gray-500">
-                  First Name
-                </label>
-                <input
-                  type="text"
-                  placeholder={user.name || "John"}
-                  className="ring-1 ring-gray-300 p-[13px] rounded-md text-sm"
-                  name="name"
-                />
-              </div>
-              <div className="flex flex-col gap-4">
-                <label htmlFor="" className="text-xs text-gray-500">
-                  Surname
-                </label>
-                <input
-                  type="text"
-                  placeholder={user.surname || "Doe"}
-                  className="ring-1 ring-gray-300 p-[13px] rounded-md text-sm"
-                  name="surname"
-                />
-              </div>
-              {/* INPUT */}
-              <div className="flex flex-col gap-4">
-                <label htmlFor="" className="text-xs text-gray-500">
-                  Description
-                </label>
-                <input
-                  type="text"
-                  placeholder={user.description || "Life is beautiful..."}
-                  className="ring-1 ring-gray-300 p-[13px] rounded-md text-sm"
-                  name="description"
-                />
-              </div>
-              {/* INPUT */}
-              <div className="flex flex-col gap-4">
-                <label htmlFor="" className="text-xs text-gray-500">
-                  City
-                </label>
-                <input
-                  type="text"
-                  placeholder={user.city || "New York"}
-                  className="ring-1 ring-gray-300 p-[13px] rounded-md text-sm"
-                  name="city"
-                />
-              </div>
-              {/* INPUT */}
-
-              <div className="flex flex-col gap-4">
-                <label htmlFor="" className="text-xs text-gray-500">
-                  School
-                </label>
-                <input
-                  type="text"
-                  placeholder={user.school || "MIT"}
-                  className="ring-1 ring-gray-300 p-[13px] rounded-md text-sm"
-                  name="school"
-                />
-              </div>
-              {/* INPUT */}
-
-              <div className="flex flex-col gap-4">
-                <label htmlFor="" className="text-xs text-gray-500">
-                  Work
-                </label>
-                <input
-                  type="text"
-                  placeholder={user.work || "Apple Inc."}
-                  className="ring-1 ring-gray-300 p-[13px] rounded-md text-sm"
+            {/* CONDITIONAL FIELDS */}
+            {isStudent ? (
+              <>
+                <div>
+                  <Label htmlFor="course">Course</Label>
+                  <Input
+                    id="course"
+                    name="course"
+                    placeholder={user.course || "Computer Science"}
+                    defaultValue={user.course || ""}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="regNo">Registration Number</Label>
+                  <Input
+                    id="regNo"
+                    name="regNo"
+                    placeholder={user.regNo || "SCT-253-000/yyyy"}
+                    defaultValue={user.regNo || ""}
+                    className="mt-1"
+                  />
+                </div>
+              </>
+            ) : (
+              <div>
+                <Label htmlFor="work">Work</Label>
+                <Input
+                  id="work"
                   name="work"
+                  placeholder={user.work || "Apple Inc."}
+                  defaultValue={user.work || ""}
+                  className="mt-1"
                 />
               </div>
-              {/* INPUT */}
+            )}
+          </div>
 
-              <div className="flex flex-col gap-4">
-                <label htmlFor="" className="text-xs text-gray-500">
-                  Website
-                </label>
-                <input
-                  type="text"
-                  placeholder={user.website || "lama.dev"}
-                  className="ring-1 ring-gray-300 p-[13px] rounded-md text-sm"
-                  name="website"
-                />
-              </div>
-            </div>
+          {/* FEEDBACK */}
+          {state.success &&
+            showToast("success", <p>Your Profile is updated Successfully</p>)}
+          {state.error &&
+            showToast(
+              "warning",
+              <p>There was a problem updating your profile</p>
+            )}
+
+          <DialogFooter>
             <UpdateButton />
-            {state.success && (
-              <span className="text-green-500">Profile has been updated!</span>
-            )}
-            {state.error && (
-              <span className="text-red-500">Something went wrong!</span>
-            )}
-            <div
-              className="absolute text-xl right-2 top-3 cursor-pointer"
-              onClick={handleClose}
-            >
-              X
-            </div>
-          </form>
-        </div>
-      )}
-    </div>
+            <Button type="button" variant="ghost" onClick={handleClose}>
+              Cancel
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };
 

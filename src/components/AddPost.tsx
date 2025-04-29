@@ -66,16 +66,12 @@ const AddPost = () => {
                   className="flex items-center gap-2 cursor-pointer"
                   onClick={() => open()}
                 >
-                  <Image src="/addimage.png" alt="" width={20} height={20} />
-                  Photo
+                  <Image src="/addimage.png" alt="" width={20} height={20} /> /
+                  <Image src="/addVideo.png" alt="" width={20} height={20} />
                 </div>
               );
             }}
           </CldUploadWidget>
-          <div className="flex items-center gap-2 cursor-pointer">
-            <Image src="/addVideo.png" alt="" width={20} height={20} />
-            Video
-          </div>
           <div className="flex items-center gap-2 cursor-pointer">
             <Image src="/poll.png" alt="" width={20} height={20} />
             Poll

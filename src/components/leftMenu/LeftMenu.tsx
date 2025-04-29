@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import ProfileCard from "./ProfileCard";
-import Ad from "../Ad";
+//import Ad from "../Ad";
 
 const LeftMenu = ({ type }: { type: "home" | "profile" }) => {
   return (
@@ -9,31 +9,7 @@ const LeftMenu = ({ type }: { type: "home" | "profile" }) => {
       {type === "home" && <ProfileCard />}
       <div className="p-4 bg-white rounded-lg shadow-md text-sm text-gray-500 flex flex-col gap-2">
         <Link
-          href="/"
-          className="flex items-center gap-4 p-2 rounded-lg hover:bg-slate-100"
-        >
-          <Image src="/posts.png" alt="" width={20} height={20} />
-          <span>My Posts</span>
-        </Link>
-        <hr className="border-t-1 border-gray-50 w-36 self-center" />
-        <Link
-          href="/"
-          className="flex items-center gap-4 p-2 rounded-lg hover:bg-slate-100"
-        >
-          <Image src="/activity.png" alt="" width={20} height={20} />
-          <span>Activity</span>
-        </Link>
-        <hr className="border-t-1 border-gray-50 w-36 self-center" />
-        <Link
-          href="/"
-          className="flex items-center gap-4 p-2 rounded-lg hover:bg-slate-100"
-        >
-          <Image src="/market.png" alt="" width={20} height={20} />
-          <span>Marketplace</span>
-        </Link>
-        <hr className="border-t-1 border-gray-50 w-36 self-center" />
-        <Link
-          href="/"
+          href="/events"
           className="flex items-center gap-4 p-2 rounded-lg hover:bg-slate-100"
         >
           <Image src="/events.png" alt="" width={20} height={20} />
@@ -41,54 +17,23 @@ const LeftMenu = ({ type }: { type: "home" | "profile" }) => {
         </Link>
         <hr className="border-t-1 border-gray-50 w-36 self-center" />
         <Link
-          href="/"
+          href="https://mmu-appointment.netlify.app/"
           className="flex items-center gap-4 p-2 rounded-lg hover:bg-slate-100"
         >
-          <Image src="/albums.png" alt="" width={20} height={20} />
-          <span>Albums</span>
+          <Image src="/activity.png" alt="" width={20} height={20} />
+          <span>Appointment</span>
         </Link>
         <hr className="border-t-1 border-gray-50 w-36 self-center" />
         <Link
-          href="/"
+          href="/doctors"
           className="flex items-center gap-4 p-2 rounded-lg hover:bg-slate-100"
         >
-          <Image src="/videos.png" alt="" width={20} height={20} />
-          <span>Videos</span>
+          <Image src="/noAvatar.png" alt="" width={20} height={20} />
+          <span>Doctors</span>
         </Link>
         <hr className="border-t-1 border-gray-50 w-36 self-center" />
-        <Link
-          href="/"
-          className="flex items-center gap-4 p-2 rounded-lg hover:bg-slate-100"
-        >
-          <Image src="/news.png" alt="" width={20} height={20} />
-          <span>News</span>
-        </Link>
-        <hr className="border-t-1 border-gray-50 w-36 self-center" />
-        <Link
-          href="/"
-          className="flex items-center gap-4 p-2 rounded-lg hover:bg-slate-100"
-        >
-          <Image src="/courses.png" alt="" width={20} height={20} />
-          <span>Courses</span>
-        </Link>
-        <hr className="border-t-1 border-gray-50 w-36 self-center" />
-        <Link
-          href="/"
-          className="flex items-center gap-4 p-2 rounded-lg hover:bg-slate-100"
-        >
-          <Image src="/lists.png" alt="" width={20} height={20} />
-          <span>Lists</span>
-        </Link>
-        <hr className="border-t-1 border-gray-50 w-36 self-center" />
-        <Link
-          href="/"
-          className="flex items-center gap-4 p-2 rounded-lg hover:bg-slate-100"
-        >
-          <Image src="/settings.png" alt="" width={20} height={20} />
-          <span>Settings</span>
-        </Link>
       </div>
-      <Ad size="sm"/>
+      {/**<Ad size="sm" /> */}
     </div>
   );
 };

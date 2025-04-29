@@ -83,9 +83,15 @@ const UserInfoCard = async ({ user }: { user: User }) => {
         {user.school && (
           <div className="flex items-center gap-2">
             <Image src="/school.png" alt="" width={16} height={16} />
-            <span>
-              Went to <b>{user.school}</b>
-            </span>
+            {user.occupation == "STUDENT" ? (
+              <span>
+                Am currently <b>{user.school}</b>
+              </span>
+            ) : (
+              <span>
+                Went to <b>{user.school}</b>
+              </span>
+            )}
           </div>
         )}
         {user.work && (
