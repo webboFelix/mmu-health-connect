@@ -25,6 +25,12 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "10mb", // increase to 10 MB or more as needed
+    },
+  },
 };
 
 export default nextConfig;
